@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo - Unidades 1 a 4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="max-w-3xl w-full bg-gray-800 rounded-2xl shadow-2xl overflow-hidden fade-in border border-gray-700">
+        <!-- Header -->
+        <div class="bg-blue-900 p-6 text-white text-center border-b border-blue-800">
+            <h1 class="text-2xl font-bold">Cuestionario: Derecho Informático y Tecnológico</h1>
+            <p class="text-blue-300 mt-2">Unidades 1 a 4 | 80 Preguntas</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-700 h-2">
+            <div id="progress-bar" class="bg-blue-500 h-2 transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div class="p-6 md:p-8">
+            <div id="start-screen" class="text-center">
+                <h2 class="text-xl font-semibold mb-4 text-white">¡Bienvenido al Cuestionario de Repaso!</h2>
+                <p class="mb-6 text-gray-400">Este cuestionario contiene exactamente 80 preguntas (Multiple Choice, Verdadero/Falso y Autocompletar definiciones) extraídas estrictamente del apunte provisto.</p>
+                <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+                    Comenzar Cuestionario
+                </button>
+            </div>
+
+            <div id="question-screen" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <span id="question-counter" class="text-sm font-bold text-gray-400 uppercase tracking-wider">Pregunta 1 / 80</span>
+                    <span id="score-display" class="text-sm font-bold text-green-400 bg-green-900/30 px-3 py-1 rounded-full border border-green-800/50">Puntos: 0</span>
+                </div>
+                
+                <h3 id="question-text" class="text-lg md:text-xl font-medium mb-6 leading-relaxed text-white"></h3>
+                
+                <div id="options-container" class="space-y-3">
+                    <!-- Opciones se inyectan acá -->
+                </div>
+                
+                <div id="feedback" class="mt-6 p-4 rounded-lg hidden font-medium text-center"></div>
+                <div id="explanation" class="mt-4 p-4 rounded-lg hidden text-sm bg-gray-700 border-l-4 border-blue-500 text-gray-200"></div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button id="prev-btn" onclick="prevQuestion()" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        ← Retroceder
+                    </button>
+                    <div class="flex-grow"></div>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        Siguiente Pregunta →
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden text-center fade-in">
+                <h2 class="text-3xl font-bold mb-4 text-white">Cuestionario Finalizado</h2>
+                <div class="text-6xl mb-6" id="emoji-result">🏆</div>
+                <p class="text-xl mb-2 text-gray-300">Tu puntaje final es:</p>
+                <p class="text-4xl font-bold text-blue-400 mb-8"><span id="final-score">0</span> / 80</p>
+                <button onclick="location.reload()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+                    Volver a Intentar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const normalizeStr = (str) => {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        };
+
+        const quizData = [
+            // UNIDAD 1
+            { q: "La Sociedad de la Información reemplazó a la Sociedad Industrial a mediados del siglo XX.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "A mediados del siglo XX la denominada 'Sociedad Industrial' fuera reemplazada por la actualmente 'sociedad de la información'[cite: 1]." },
+            { q: "Según el texto, autor de la antigüedad que sostiene que el hombre es un ser social por naturaleza:", t: "fill", a: ["aristoteles"], exp: "Según Aristóteles el hombre por naturaleza es un ser social[cite: 1]." },
+            { q: "Agrupación permanente y organizada de personas, basada en la cooperación, que comparten un mismo espacio y persiguen el bien común:", t: "fill", a: ["sociedad", "la sociedad"], exp: "Llamaremos sociedad a la agrupación permanente y organizada de personas, basada en la cooperación, que comparten un mismo espacio y persiguen el bien común[cite: 1]." },
+            { q: "¿De qué término latino proviene la palabra 'derecho'?", t: "mc", opts: ["Directum", "Ius", "Lex", "Norma"], a: 0, exp: "La palabra derecho proviene del término latino directum, que significa 'lo que está conforme a la regla'[cite: 2]." },
+            { q: "El derecho es un conjunto de normas que permiten resolver los conflictos en el seno de una sociedad.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Dicho de otra forma, el derecho es un conjunto de normas que permiten resolver los conflictos en el seno de una sociedad[cite: 2]." },
+            { q: "¿Cuáles son los fines para los que sirve el derecho según el apunte?", t: "mc", opts: ["Lucro, orden y castigo", "Orden, paz, bien común y seguridad jurídica", "Dominio, poder y control", "Progreso tecnológico y social"], a: 1, exp: "¿Para qué sirve el derecho?, sirve para establecer el orden, la paz; conseguir el bien común y proporcionar la seguridad jurídica[cite: 2]." },
+            { q: "Valor jurídico que consiste en la garantía que el derecho proporciona respecto de la conservación y respeto de los derechos de los asociados:", t: "fill", a: ["seguridad juridica", "la seguridad juridica"], exp: "Seguridad Jurídica: es el valor jurídico que consiste en la garantía que el derecho proporciona a los asociados respecto de la conservación y respeto de sus derechos[cite: 2]." },
+            { q: "Conjunto de condiciones sociales que favorecen la existencia y el desarrollo del hombre:", t: "fill", a: ["bien comun", "el bien comun"], exp: "Bien Común: conjunto de condiciones sociales que favorecen la existencia y el desarrollo del hombre[cite: 2]." },
+            { q: "La Informática Jurídica constituye una rama autónoma del derecho.", t: "tf", opts: ["Verdadero", "Falso"], a: 1, exp: "Por lo tanto, no constituye una rama del derecho, pues su temática es fundamentalmente tecnológica[cite: 2]." },
+            { q: "¿Cómo se clasifica la Informática Jurídica?", t: "mc", opts: ["Nacional e Internacional", "Pública y Privada", "Documental, de gestión y control, y decisoria", "Hardware y Software"], a: 2, exp: "La Informática Jurídica se clasifica en: Informática jurídica documental, Informática jurídica de gestión y control, Informática jurídica decisoria[cite: 2]." },
+            { q: "Informática jurídica que consiste en la creación, almacenamiento y recuperación de información como leyes, doctrina y jurisprudencia:", t: "fill", a: ["documental", "informatica juridica documental"], exp: "Informática jurídica documental: Consiste en la creación, almacenamiento y recuperación de información jurídica como leyes, doctrina, jurisprudencia...[cite: 2]." },
+            { q: "El uso del programa 'Lex Doctor' en un estudio jurídico es un ejemplo de informática jurídica de...", t: "fill", a: ["gestion", "gestion y control"], exp: "...un claro ejemplo de este tipo de Informática es la que se usa en las 'Mesas de Entradas Virtuales'... y otro ejemplo es el uso de programas que ayuden a los Abogados... como el conocido 'Lex Doctor'[cite: 2]." },
+            { q: "La informática jurídica decisoria se basa en sistemas que brindan soluciones a problemáticas jurídicas a través del uso de...", t: "mc", opts: ["Redes sociales", "Soporte papel", "Inteligencia artificial", "Documentos administrativos"], a: 2, exp: "Informática jurídica decisoria: Está constituida por sistemas que dan soporte a la toma de decisiones, a través de sistemas de inteligencia artificial que brindan soluciones...[cite: 2]." },
+            { q: "Conjunto de principios y normas que regulan los efectos jurídicos nacidos de la interrelación de sujetos en el ámbito de la informática:", t: "fill", a: ["derecho informatico", "el derecho informatico"], exp: "Definimos al Derecho Informático como el conjunto de principios y normas que regulan los efectos jurídicos nacidos de la interrelación de sujetos en el ámbito de la informática y sus derivaciones[cite: 3]." },
+            { q: "La 'Tecnología de la Información' es la utilización de múltiples medios para almacenar, procesar y difundir todo tipo de información.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Tecnología de la Información, como concepto sociológico, define a la utilización de múltiples medios para almacenar, procesar y difundir todo tipo de información[cite: 3]." },
+
+            // UNIDAD 2
+            { q: "Infraestructura formal pre-internet que permitió la transferencia organizada de datos comerciales directamente de un sistema de cómputo a otro (sus siglas en inglés):", t: "fill", a: ["edi", "electronic data interchange", "intercambio electronico de datos"], exp: "El pilar tecnológico primordial de esta etapa fundacional fue el Intercambio Electrónico de Datos, conocido globalmente por sus siglas en inglés como EDI[cite: 3]." },
+            { q: "La 'definición restringida' de comercio electrónico adopta un criterio tecnológico neutral que abarca transacciones con o sin internet.", t: "tf", opts: ["Verdadero", "Falso"], a: 1, exp: "Por otro lado, la 'definición amplia' adopta un criterio tecnológico neutral y expansivo, abarcando... con o sin conexión a Internet[cite: 4]." },
+            { q: "El salto cualitativo entre el comercio tradicional y el electrónico se basa en la desmaterialización de los negocios, reemplazando el papel por:", t: "mc", opts: ["Soportes magnéticos, electrónicos, ópticos o digitales", "Sellos de lacre", "Títulos valores impresos", "Firmas holográficas certificadas"], a: 0, exp: "El soporte papel es reemplazado por soportes magnéticos, electrónicos, ópticos o digitales que carecen de presencia tridimensional[cite: 5]." },
+            { q: "Operación comercial que comienza, se desarrolla y se agota puramente por medios digitales, sin entrega física (ej. descarga de software):", t: "fill", a: ["comercio electronico directo", "comercio directo", "directo"], exp: "El Comercio Electrónico Directo... se configura cuando la operación comercial... comienza, se desarrolla y se agota mediante el acto inicial de transferencia de una cosa intangible por medios puramente digitales[cite: 5]." },
+            { q: "Comercio mixto que requiere indefectiblemente de una segunda etapa de entrega física de la cosa tangible:", t: "fill", a: ["comercio electronico indirecto", "comercio indirecto", "indirecto"], exp: "El Comercio Electrónico Indirecto... requiere indefectiblemente de una segunda etapa que es la entrega física de la cosa al domicilio del comprador[cite: 5]." },
+            { q: "El modelo de negocio que abarca transferencias exclusivas entre empresas (Business-to-Business) se abrevia como:", t: "fill", a: ["b2b"], exp: "Comercio Electrónico B2B (Business-to-Business): Abarca todas las transferencias electrónicas de datos y transacciones comerciales que ocurren exclusivamente entre personas jurídicas de carácter privado (empresas)[cite: 6]." },
+            { q: "El comercio electrónico B2C es el modelo 'Del Negocio al Consumidor'.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Comercio Electrónico B2C (Business-to-Consumer): 'Del Negocio al Consumidor'[cite: 6]." },
+            { q: "Modelo que digitaliza las relaciones laborales y transaccionales internas de una organización mediante la Intranet corporativa:", t: "mc", opts: ["B2G", "B2B", "C2C", "B2E"], a: 3, exp: "Comercio Electrónico B2E (Business-to-Employee): Digitaliza las relaciones laborales y transaccionales internas de una organización mediante la Intranet corporativa[cite: 6]." },
+            { q: "Modelo que vincula comercialmente a un consumidor final con otro particular que desea vender cosas usadas (ej. MercadoLibre):", t: "fill", a: ["c2c", "consumer to consumer"], exp: "Comercio Electrónico C2C (Consumer-to-Consumer): Vincula comercialmente a un consumidor final con otro particular que desea vender cosas usadas o prestar servicios (ej. MercadoLibre)[cite: 6]." },
+            { q: "El pago de impuestos en AFIP es un ejemplo del modelo C2G (Citizen-to-Government).", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Comercio Electrónico C2G (Citizen-to-Government): Facilita el intercambio de transacciones y obligaciones legales (pago de impuestos, consultas públicas) entre ciudadanos y reparticiones estatales[cite: 6]." },
+            { q: "¿Cuáles son los 4 elementos esenciales de validez del contrato electrónico?", t: "mc", opts: ["Firma, papel, sellado y capacidad", "Capacidad jurídica, consentimiento, objeto lícito y causa lícita", "Internet, hardware, software y datos", "Oferta, demanda, precio y producto"], a: 1, exp: "debe cumplir a rajatabla con los cuatro elementos esenciales de todo negocio jurídico de derecho privado: Capacidad Jurídica... Consentimiento de las Partes... Objeto Lícito... Causa Lícita[cite: 7]." },
+            { q: "Elemento de validez del contrato que implica la manifestación libre de la voluntad en la que confluyen oferta y aceptación:", t: "fill", a: ["consentimiento", "el consentimiento"], exp: "Consentimiento de las Partes: Implica la manifestación libre de la voluntad en la cual confluyen la oferta emanada por el proponente y la aceptación expresa del destinatario[cite: 7]." },
+            { q: "Imposibilidad legal de que un contratante niegue la autoría de su firma o desconozca el contenido del contrato que celebró en línea:", t: "fill", a: ["no repudio", "el no repudio"], exp: "No repudio de las manifestaciones de voluntad: Representa la imposibilidad legal de que un contratante niegue la autoría de su firma o desconozca el contenido del contrato que ha celebrado en línea[cite: 7]." },
+            { q: "En Argentina, la plena capacidad de ejercicio se configura al haber alcanzado los 21 años.", t: "tf", opts: ["Verdadero", "Falso"], a: 1, exp: "En Argentina, la plena capacidad de ejercicio se configura al haber alcanzado la mayoría de edad establecida por ley a los 18 años[cite: 7]." },
+            { q: "Todo ente que posee aptitud para ser titular de derechos y de obligaciones se define jurídicamente como:", t: "fill", a: ["persona", "una persona"], exp: "En materia jurídica, la persona se define como todo centro de imputación de normas jurídicas, es decir, todo ente que posee aptitud para ser titular de derechos y de obligaciones[cite: 8]." },
+            { q: "¿Desde cuándo comienza la existencia de la persona humana en el sistema del Código Civil y Comercial argentino?", t: "mc", opts: ["Desde el nacimiento con vida", "Desde los 18 años", "Desde la concepción", "Desde el embarazo de 3 meses"], a: 2, exp: "De acuerdo con la sistemática del Código Civil y Comercial argentino (Art. 19), la existencia de la persona humana comienza formalmente desde la Concepción[cite: 8]." },
+            { q: "Los derechos adquiridos por la persona por nacer quedan condicionados irrevocablemente a un hecho natural futuro: el nacimiento con vida.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Sin embargo, todos estos derechos adquiridos quedan irrevocablemente condicionados a un hecho natural futuro e incierto que funciona como una verdadera condición resolutoria: el Nacimiento con Vida[cite: 8]." },
+            { q: "La existencia de la persona humana concluye formalmente con su:", t: "fill", a: ["muerte natural", "muerte"], exp: "La existencia de la persona humana concluye formalmente con su muerte natural[cite: 8]." },
+            { q: "¿Cuál es el plazo para el supuesto ordinario de Ausencia con Presunción de Fallecimiento?", t: "mc", opts: ["1 año", "2 años", "3 años", "6 meses"], a: 2, exp: "Se clasifica en Supuesto Ordinario (3 años), Extraordinario Genérico (2 años tras desastre) y Extraordinario Específico (6 meses en nave naufragada)[cite: 8]." },
+            { q: "La Ley 24.321 regula una declaración de ausencia muy particular en la historia argentina, originada en la...", t: "fill", a: ["desaparicion forzada", "desaparicion forzada de personas"], exp: "Un supuesto de especial y profunda trascendencia en la historia jurídica de la República Argentina es la declaración de ausencia por desaparición forzada, regulada en la Ley Nacional Nº 24.321[cite: 9]." },
+            { q: "Entes a los cuales el ordenamiento jurídico les confiere aptitud legal para adquirir derechos y contraer obligaciones para cumplir su objeto social:", t: "fill", a: ["persona juridica", "las personas juridicas", "personas juridicas"], exp: "El Artículo 141 del Código Civil y Comercial las define como todos aquellos entes a los cuales el ordenamiento jurídico les confiere aptitud legal suficiente para adquirir derechos y contraer obligaciones con el fin exclusivo de cumplir con su objeto social[cite: 9]." },
+            { q: "Las personas jurídicas privadas nacen a la vida legal desde el instante del otorgamiento de su acto constitutivo, rigiendo el principio de libre constitución.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "rige en nuestro derecho el principio de libre constitución: las personas jurídicas privadas nacen a la vida legal desde el instante mismo del otorgamiento de su acto constitutivo[cite: 9]." },
+            { q: "¿Qué nombre recibe el rango etario de menores que se inicia a los 13 años y concluye a los 16 años?", t: "mc", opts: ["Impúberes", "Adolescente", "Emancipados", "Niños"], a: 1, exp: "En este esquema, se resalta la novedosa figura del Adolescente, rango etario de menores de edad que se inicia formalmente a los trece (13) años y concluye a los dieciséis (16) años de edad[cite: 10]." },
+            { q: "En la contratación electrónica, el consumidor goza de un plazo irrenunciable para retractarse conocido como 'Botón de arrepentimiento'. ¿De cuántos días es este plazo?", t: "mc", opts: ["5 días hábiles", "10 días corridos", "15 días corridos", "30 días corridos"], a: 1, exp: "Esta facultad le otorga al usuario el derecho a retractarse de la aceptación de la oferta de compra durante el plazo perentorio de diez (10) días corridos contados a partir de la fecha de entrega[cite: 10]." },
+            { q: "En materia de consumo transfronterizo, se admite plenamente el acuerdo de elección de foro judicial por parte de la empresa.", t: "tf", opts: ["Verdadero", "Falso"], a: 1, exp: "De forma categórica y fundamental, la ley de fondo establece que en esta materia de consumo transfronterizo NO se admite de manera alguna el acuerdo de elección de foro[cite: 11]." },
+
+            // UNIDAD 3
+            { q: "Russell y Norvig unifican el estudio de la IA bajo el concepto de...", t: "fill", a: ["agentes inteligentes"], exp: "Stuart Russell y Peter Norvig unifican el estudio de la IA bajo el concepto de agentes inteligentes[cite: 11]." },
+            { q: "Cualidad de la IA que representa la capacidad de tomar decisiones en tiempo real orientadas a un objetivo explícito:", t: "fill", a: ["intencionalidad"], exp: "Intencionalidad: Capacidad de tomar decisiones en tiempo real orientadas a un objetivo explícito a partir de la información procesada[cite: 12]." },
+            { q: "Alan Turing publicó en 1950 el célebre 'Test de Turing' para evaluar la capacidad imitativa de las máquinas.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "1950... Alan Turing publica el célebre 'Test de Turing' para evaluar la capacidad imitativa de las máquinas[cite: 12]." },
+            { q: "Evento de 1956 donde John McCarthy acuñó oficialmente el término 'Inteligencia Artificial':", t: "mc", opts: ["Proyecto Manhattan", "Conferencia de Dartmouth", "Convención de Ginebra", "Foro Económico Mundial"], a: 1, exp: "1956: Conferencia de Dartmouth: John McCarthy acuña oficialmente el término 'Inteligencia Artificial'[cite: 12]." },
+            { q: "En 1997, ¿qué supercomputadora de IBM derrotó al campeón mundial de ajedrez Gary Kasparov?", t: "fill", a: ["deep blue"], exp: "1997: La supercomputadora Deep Blue de IBM derrota al campeón mundial de ajedrez Gary Kasparov[cite: 12]." },
+            { q: "Es el único tipo de IA existente en la actualidad, diseñada para ejecutar una tarea específica o un conjunto acotado de funciones:", t: "mc", opts: ["IA General (AGI)", "IA Especializada (Narrow/Weak AI)", "IA Consciente", "IA Cuántica"], a: 1, exp: "IA Especializada, Estrecha o Débil (Narrow / Weak AI): Es el único tipo de IA existente en la actualidad. Se encuentra diseñada y optimizada para ejecutar una tarea específica[cite: 12]." },
+            { q: "La Inteligencia Artificial General (AGI), dotada de capacidad cognitiva comparable a la humana, ya existe y es de uso comercial.", t: "tf", opts: ["Verdadero", "Falso"], a: 1, exp: "IA General o Fuerte (Artificial General Intelligence - AGI)... A la fecha, la AGI no existe en la realidad técnica[cite: 12]." },
+            { q: "¿Cuáles son los 4 pilares estructurales de funcionamiento de un sistema de IA?", t: "mc", opts: ["Internet, Hardware, Software, Nube", "Datos, Algoritmos, Modelos, Redes Neuronales", "Sensores, Cámaras, Procesadores, Baterías", "Código, Texto, Imagen, Sonido"], a: 1, exp: "Para comprender la arquitectura operativa de un sistema de IA, es preciso definir sus cuatro elementos estructurales: Datos... Algoritmos... Modelos... Redes Neuronales Artificiales[cite: 13]." },
+            { q: "Pilar de la IA considerado la 'materia prima indispensable' a partir de la cual la IA aprende y mejora:", t: "fill", a: ["datos", "los datos"], exp: "Datos: Materia prima indispensable. La IA aprende, ajusta sus parámetros y mejora a partir de grandes volúmenes de información[cite: 13]." },
+            { q: "Rama de la IA que otorga a las computadoras la capacidad de aprender sin ser programadas explícitamente instrucción por instrucción:", t: "fill", a: ["machine learning", "aprendizaje automatico"], exp: "El Machine Learning (Aprendizaje Automático) es una rama de la IA que otorga a las computadoras la capacidad de aprender sin ser programadas explícitamente instrucción por instrucción[cite: 13]." },
+            { q: "Subcategoría especializada que emplea redes neuronales profundas de múltiples capas intermedias (Aprendizaje Profundo):", t: "fill", a: ["deep learning", "el deep learning"], exp: "Deep Learning (Aprendizaje Profundo) es una subcategoría especializada del Machine Learning que emplea redes neuronales profundas de múltiples capas intermedias[cite: 13]." },
+            { q: "Instrucción, texto o solicitud estructurada que se proporciona a un modelo de IA para dirigir su ejecución:", t: "fill", a: ["prompt", "el prompt"], exp: "Un Prompt es la instrucción, texto o solicitud estructurada que se proporciona a un modelo de IA para dirigir su ejecución[cite: 13]." },
+            { q: "El desarrollo desregulado de la IA conlleva riesgos como el desplazamiento laboral y los sistemas de armas autónomas.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Entre los principales desafíos destacan: Sistemas de Armas Autónomas... Desplazamiento Laboral y Sesgos Algorítmicos[cite: 13]." },
+            { q: "Uso de modelos generativos para crear videos o imágenes falsas y manipular la opinión pública a gran escala:", t: "mc", opts: ["Scoring", "Deepfakes", "Phishing", "Blockchain"], a: 1, exp: "Guerra Cibergráfica y Desinformación Masiva: Uso de modelos generativos para crear deepfakes, suplantación de identidad y manipulación de la opinión pública a gran escala[cite: 13]." },
+            { q: "La Ley de Inteligencia Artificial de la Unión Europea (EU AI Act) clasifica a la Puntuación social (social scoring) en el nivel de riesgo...", t: "fill", a: ["inadmisible", "prohibido", "riesgo inadmisible"], exp: "Nivel de Riesgo Inadmisible / Prohibido: Puntuación social (social scoring), manipulación subliminal...[cite: 14]." },
+            { q: "En la UE, los sistemas de identificación biométrica remota en tiempo real están clasificados como de riesgo Alto, no Inadmisible.", t: "tf", opts: ["Verdadero", "Falso"], a: 1, exp: "reconocimiento facial masivo en tiempo real en espacios públicos... Prohibición absoluta [Inadmisible][cite: 14]." },
+            { q: "¿Qué nivel de riesgo y regulación aplica a los modelos generativos como ChatGPT (modelos GPT/LLMs) según la Unión Europea?", t: "mc", opts: ["Inadmisible", "Alto Riesgo", "Riesgo Limitado / Transparencia", "Riesgo Mínimo"], a: 2, exp: "Riesgo Limitado / Transparencia: Chatbots de atención, Deepfakes, IA generativa de texto/imágenes/video (modelos GPT/LLMs)[cite: 14]." },
+            { q: "Primer instrumento normativo global de soft law adoptado por consenso de 193 estados en 2021:", t: "mc", opts: ["Constitución de la ONU", "Recomendación sobre la Ética de la IA de la UNESCO", "Tratado de IA de Mercosur", "EU AI Act"], a: 1, exp: "Recomendación sobre la Ética de la IA de la UNESCO (2021/2023): Adoptada por consenso por 193 Estados miembros, constituye el primer instrumento normativo global de soft law[cite: 14]." },
+            { q: "En la República Argentina, los sistemas de IA carecen de personalidad jurídica.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "la IA ejecuta operaciones técnicas, pero los sistemas de IA carecen de personalidad jurídica[cite: 15]." },
+            { q: "Siglas de la Agencia Nacional de Supervisión de Inteligencia Artificial cuya creación se debate legislativamente en Argentina:", t: "fill", a: ["ansia"], exp: "Se debate la creación de la Agencia Nacional de Supervisión de la Inteligencia Artificial (ANSIA) y reformas al Código Penal[cite: 15]." },
+
+            // UNIDAD 4
+            { q: "Acto voluntario lícito que tiene por fin inmediato establecer entre las personas relaciones jurídicas:", t: "fill", a: ["acto juridico", "el acto juridico"], exp: "el acto jurídico se concibe como el acto voluntario lícito que tiene por fin inmediato establecer entre las personas relaciones jurídicas[cite: 15]." },
+            { q: "Principio que establece que no se denegarán efectos jurídicos ni eficacia probatoria a la información por estar en un documento electrónico:", t: "fill", a: ["equivalencia funcional", "principio de equivalencia funcional"], exp: "Principio de Equivalencia Funcional. Este principio establece que no se denegarán efectos jurídicos, validez ni eficacia probatoria a la información por el solo motivo de que conste en un documento electrónico o digital[cite: 16]." },
+            { q: "¿Cuáles son las cuatro funciones jurídicas cardinales de la firma?", t: "mc", opts: ["Decorativa, temporal, económica, física", "Indicativa, declarativa, probatoria y de garantía de integridad", "Subjetiva, objetiva, moral, ética", "Bancaria, registral, notarial, administrativa"], a: 1, exp: "las cuatro funciones jurídicas cardinales que la firma cumple...: Función Indicativa..., Función Declarativa..., Función Probatoria..., y Función de Garantía de Integridad[cite: 16]." },
+            { q: "Todo registro en soporte que almacena información binaria (como un correo simple o chat de WhatsApp) se denomina genéricamente...", t: "fill", a: ["documento electronico"], exp: "Documento Electrónico (Género): Comprende cualquier registro en soporte que almacena información binaria (ej. correo electrónico simple, chat de WhatsApp)[cite: 16]." },
+            { q: "Representación digital de actos o hechos que satisface el requisito de escritura si está firmado digitalmente por un certificado válido (Art 6 Ley 25.506):", t: "fill", a: ["documento digital"], exp: "Documento Digital (Especie): Conforme al Artículo 6 de la Ley 25.506, es la representación digital de actos o hechos que satisface el requisito de escritura cuando el documento es firmado digitalmente[cite: 16]." },
+            { q: "Un instrumento privado digital (PDF con firma digital licenciada) es equiparado por el Código Civil a un instrumento con firma manuscrita.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Instrumentos Privados Digitales (Art. 288 CCyC)... Archivos PDF/XML con firma digital licenciada... Equiparado a firma manuscrita[cite: 17]." },
+            { q: "Los chats de WhatsApp y los correos electrónicos simples son considerados en el CCyC como:", t: "mc", opts: ["Instrumentos públicos", "Instrumentos privados digitales", "Instrumentos particulares no firmados", "Instrumentos nulos"], a: 2, exp: "Instrumentos Particulares No Firmados (Art. 287 CCyC): Mails, chats de WhatsApp, firmas electrónicas simples, scans[cite: 17]." },
+            { q: "La criptografía simétrica utiliza una sola clave secreta tanto para cifrar como para descifrar, lo cual dificulta el no repudio.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "Criptografía Simétrica (Clave Compartida)... Presenta un severo inconveniente para la firma digital: exige compartir la clave. Si dos o más personas conocen la misma clave, resulta imposible determinar quién fue el autor, anulando el principio de no repudio[cite: 17]." },
+            { q: "Tipo de criptografía basada en la generación de un par de claves matemáticas (una Pública y una Privada):", t: "fill", a: ["criptografia asimetrica", "asimetrica"], exp: "Criptografía Asimétrica (Par de Claves Pública y Privada): Se basa en la generación de un par de claves matemáticas unívocamente vinculadas entre sí[cite: 17]." },
+            { q: "En la firma digital, ¿qué clave permanece bajo el exclusivo control del titular y se utiliza para generar la firma?", t: "mc", opts: ["Clave Pública", "Clave Privada", "Clave Compartida", "Clave Hash"], a: 1, exp: "Clave Privada (Secret Key): Permanece bajo el exclusivo control del titular. Se utiliza para generar la firma digital del documento[cite: 17]." },
+            { q: "En la firma digital, ¿qué clave es de libre acceso y difusión, y sirve para que terceros verifiquen la validez de la firma?", t: "fill", a: ["clave publica", "la clave publica"], exp: "Clave Pública (Public Key): Es de libre acceso y difusión. Sirve para que cualquier tercero verifique la validez de la firma[cite: 17]." },
+            { q: "Algoritmo matemático determinista que transforma cualquier volumen de información digital en un resumen digital de longitud fija (ej. SHA-256):", t: "fill", a: ["hash", "funcion hash"], exp: "Una función Hash (como SHA-256 o SHA-3) es un algoritmo matemático determinista que transforma cualquier volumen de información digital en un resumen digital de longitud fija[cite: 17]." },
+            { q: "¿Cuál de estos NO es un requisito legal para la validez de la Firma Digital en Argentina (Ley 25.506)?", t: "mc", opts: ["Certificado digital válido por un Licenciado", "Garantizar la detección de alteración", "Haberse firmado en presencia de escribano", "Clave privada bajo control exclusivo del firmante"], a: 2, exp: "Los cuatro requisitos son: certificado digital válido, verificada, garantizar alteración, y clave privada bajo control exclusivo. Haberse firmado ante escribano no es un requisito de firma digital[cite: 18]." },
+            { q: "Presunción legal de la Ley 25.506 que asume que el documento digital pertenece al titular del certificado digital:", t: "fill", a: ["presuncion de autoria", "autoria"], exp: "Presunción de Autoría (Art. 7°): Se presume que todo documento digital firmado digitalmente pertenece al titular del certificado digital[cite: 18]." },
+            { q: "Presunción legal de la Ley 25.506 que asume que el contenido del documento no ha sido modificado desde su suscripción:", t: "fill", a: ["presuncion de integridad", "integridad"], exp: "Presunción de Integridad (Art. 8°): Se presume que el contenido del documento no ha sido modificado desde su suscripción[cite: 18]." },
+            { q: "Todo conjunto de datos electrónicos utilizados como medio de identificación, que carezca de alguno de los requisitos legales para ser Firma Digital, se denomina:", t: "fill", a: ["firma electronica"], exp: "El Artículo 5 de la Ley 25.506 define a la Firma Electrónica por descarte o exclusión: es todo conjunto de datos electrónicos utilizados como medio de identificación, que carezca de alguno de los requisitos legales para ser Firma Digital[cite: 18]." },
+            { q: "Si en un juicio la contraparte desconoce una firma digital, la carga de probar que es falsa recae sobre quien la desconoce.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "En Firma Digital: Si la contraparte desconoce la firma, la firma se presume válida por ley. La parte que desconoce la firma debe cargar con la prueba en contrario[cite: 18]." },
+            { q: "Si se desconoce una Firma Electrónica, LA PRESUNCIÓN NO OPERA y quien invoca la validez debe probar que la firma pertenece a la contraparte.", t: "tf", opts: ["Verdadero", "Falso"], a: 0, exp: "En Firma Electrónica: Si se desconoce una firma electrónica, LA PRESUNCIÓN NO OPERA. La parte que invoca la validez del documento debe probar obligatoriamente que la firma pertenece a la contraparte[cite: 18]." },
+            { q: "Entramado normativo e institucional que administra la emisión y control de certificados digitales en Argentina (siglas en inglés):", t: "fill", a: ["pki", "public key infrastructure"], exp: "La Infraestructura de Clave Pública (PKI - Public Key Infrastructure) es el entramado normativo, técnico, institucional y operativo que administra la emisión...[cite: 19]." },
+            { q: "Según el reciente Decreto 743/2024, para emitir una firma digital, la validación de identidad se puede hacer de forma biométrica remota consultando la base de datos del:", t: "fill", a: ["renaper", "registro nacional de las personas"], exp: "Se autoriza a verificar la identidad de los solicitantes mediante validación biométrica remota en tiempo real conectando con la base de datos del Registro Nacional de las Personas (RENAPER)[cite: 19]." }
+        ];
+
+        let currentQuestion = 0;
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('question-screen').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function calculateScore() {
+            let s = 0;
+            quizData.forEach(q => {
+                if(q.answered && q.isCorrect) s++;
+            });
+            return s;
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentQuestion];
+            document.getElementById('question-counter').innerText = `Pregunta ${currentQuestion + 1} / 80`;
+            document.getElementById('score-display').innerText = `Puntos: ${calculateScore()}`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            const explanation = document.getElementById('explanation');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+
+            feedback.classList.add('hidden');
+            explanation.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            if (currentQuestion > 0) {
+                prevBtn.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
+            }
+
+            if (currentQuestion === quizData.length - 1) {
+                nextBtn.innerText = "Ver Resultados 🏆";
+            } else {
+                nextBtn.innerText = "Siguiente Pregunta →";
+            }
+
+            if (q.t === 'mc' || q.t === 'tf') {
+                q.opts.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left p-4 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors bg-gray-800 font-medium text-gray-200';
+                    btn.innerText = opt;
+                    btn.onclick = () => { if(!q.answered) checkAnswer(index, btn); };
+                    optionsContainer.appendChild(btn);
+                });
+            } else if (q.t === 'fill') {
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'flex flex-col space-y-3';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'fill-input';
+                input.className = 'w-full p-4 border border-gray-600 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-lg text-white placeholder-gray-400';
+                input.placeholder = 'Escribe tu respuesta aquí...';
+                
+                const btnSubmit = document.createElement('button');
+                btnSubmit.className = 'bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-semibold transition-colors';
+                btnSubmit.innerText = 'Verificar';
+                btnSubmit.onclick = () => { if(!q.answered) checkAnswer(document.getElementById('fill-input').value.trim()); };
+
+                input.addEventListener("keypress", function(event) {
+                    if (event.key === "Enter" && !q.answered) btnSubmit.click();
+                });
+
+                inputDiv.appendChild(input);
+                inputDiv.appendChild(btnSubmit);
+                optionsContainer.appendChild(inputDiv);
+                
+                if (!q.answered) {
+                    setTimeout(() => input.focus(), 100);
+                }
+            }
+
+            const progress = ((currentQuestion) / 80) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            // Si ya fue respondida, mostrar el estado guardado
+            if (q.answered) {
+                showSavedState();
+            }
+        }
+
+        function checkAnswer(userAnswer, btnElement = null) {
+            const q = quizData[currentQuestion];
+            q.answered = true;
+            q.givenAnswer = userAnswer;
+
+            if (q.t === 'fill') {
+                const normalizedUser = normalizeStr(userAnswer);
+                q.isCorrect = q.a.some(validAns => normalizeStr(validAns) === normalizedUser);
+            } else {
+                q.isCorrect = (userAnswer === q.a);
+            }
+
+            document.getElementById('score-display').innerText = `Puntos: ${calculateScore()}`;
+            showSavedState();
+        }
+
+        function showSavedState() {
+            const q = quizData[currentQuestion];
+            const feedback = document.getElementById('feedback');
+            const explanation = document.getElementById('explanation');
+            const optionsContainer = document.getElementById('options-container');
+            
+            const inputs = optionsContainer.querySelectorAll('button, input');
+            inputs.forEach(b => b.disabled = true);
+
+            if (q.t === 'fill') {
+                const inputField = document.getElementById('fill-input');
+                if (inputField) {
+                    inputField.value = q.givenAnswer;
+                    inputField.disabled = true;
+                    if (q.isCorrect) {
+                        inputField.classList.add('border-green-500', 'bg-green-900/30', 'text-green-300');
+                    } else {
+                        inputField.classList.add('border-red-500', 'bg-red-900/30', 'text-red-300');
+                    }
+                }
+            } else {
+                const allButtons = optionsContainer.querySelectorAll('button');
+                allButtons.forEach(b => {
+                    b.classList.remove('hover:bg-gray-700', 'bg-gray-800');
+                    b.classList.add('opacity-50', 'bg-gray-800');
+                });
+
+                if (q.givenAnswer !== q.a && q.givenAnswer !== undefined) {
+                    allButtons[q.givenAnswer].classList.remove('bg-gray-800', 'border-gray-600', 'opacity-50');
+                    allButtons[q.givenAnswer].classList.add('bg-red-900/40', 'border-red-500', 'text-red-400', 'opacity-100');
+                }
+                
+                allButtons[q.a].classList.remove('bg-gray-800', 'border-gray-600', 'opacity-50');
+                allButtons[q.a].classList.add('bg-green-900/40', 'border-green-500', 'text-green-400', 'opacity-100');
+            }
+
+            feedback.classList.remove('hidden', 'bg-green-900/40', 'text-green-400', 'border-green-500', 'bg-red-900/40', 'text-red-400', 'border-red-500');
+            
+            if (q.isCorrect) {
+                feedback.classList.add('bg-green-900/40', 'text-green-400', 'border', 'border-green-500');
+                feedback.innerText = '¡Correcto! Excelente.';
+            } else {
+                feedback.classList.add('bg-red-900/40', 'text-red-400', 'border', 'border-red-500');
+                if (q.t === 'fill') {
+                    feedback.innerText = `Incorrecto. La respuesta correcta era: "${q.a[0].toUpperCase()}"`;
+                } else {
+                    feedback.innerText = 'Incorrecto.';
+                }
+            }
+
+            explanation.innerHTML = `<strong>Explicación:</strong> ${q.exp}`;
+            explanation.classList.remove('hidden');
+
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('question-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = `100%`;
+            document.getElementById('final-score').innerText = calculateScore();
+            
+            const emoji = document.getElementById('emoji-result');
+            const score = calculateScore();
+            if(score === 80) emoji.innerText = '🏆✨';
+            else if(score > 60) emoji.innerText = '👏';
+            else if(score > 40) emoji.innerText = '👍';
+            else emoji.innerText = '📚';
+        }
+    </script>
+</body>
+</html>
